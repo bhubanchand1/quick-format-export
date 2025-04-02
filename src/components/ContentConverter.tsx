@@ -32,6 +32,8 @@ const ContentConverter = () => {
   useEffect(() => {
     if (inputContent.trim()) {
       parseContent();
+    } else {
+      setParsedData(null);
     }
   }, [inputContent]);
 
@@ -145,39 +147,39 @@ const ContentConverter = () => {
   return (
     <div className="max-w-full mx-auto px-4 py-8 space-y-8">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Content to Sheet Converter</h1>
-        <p className="text-muted-foreground">Paste structured content to convert it into a spreadsheet format</p>
+        <h1 className="text-3xl font-bold tracking-tight mb-2 text-white">Content to Sheet Converter</h1>
+        <p className="text-gray-400">Paste structured content to convert it into a spreadsheet format</p>
       </div>
 
       <div className="grid grid-cols-1 gap-8">
         {/* Input Area */}
-        <Card className="p-6">
-          <label htmlFor="content-input" className="block text-sm font-medium mb-2">
+        <Card className="p-6 bg-gray-900 border-gray-800">
+          <label htmlFor="content-input" className="block text-sm font-medium mb-2 text-gray-300">
             Paste your content:
           </label>
           <Textarea
             id="content-input"
             placeholder="Paste content in the format: slug: value, title: value, etc..."
-            className="min-h-[200px] font-mono text-sm"
+            className="min-h-[200px] font-mono text-sm bg-gray-800 border-gray-700 text-gray-200"
             value={inputContent}
             onChange={(e) => setInputContent(e.target.value)}
           />
           {error && (
-            <p className="text-destructive text-sm mt-2">{error}</p>
+            <p className="text-red-400 text-sm mt-2">{error}</p>
           )}
         </Card>
 
         {/* Sheet View */}
         {parsedData && (
-          <Card className="p-6">
+          <Card className="p-6 bg-gray-900 border-gray-800">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Sheet View</h2>
+              <h2 className="text-lg font-semibold text-white">Sheet View</h2>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={copyToClipboard} className="flex items-center gap-2">
+                <Button variant="outline" onClick={copyToClipboard} className="flex items-center gap-2 bg-gray-800 border-gray-700 text-gray-200 hover:bg-gray-700">
                   <Clipboard className="w-4 h-4" />
                   <span>Copy Data</span>
                 </Button>
-                <Button onClick={exportAsCSV} className="flex items-center gap-2">
+                <Button onClick={exportAsCSV} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
                   <ArrowDownToLine className="w-4 h-4" />
                   <span>Export CSV</span>
                 </Button>
@@ -188,32 +190,38 @@ const ContentConverter = () => {
               <Table>
                 <TableBody>
                   {/* Row with field names */}
-                  <TableRow className="bg-muted font-medium">
-                    <TableCell>ID</TableCell>
-                    <TableCell>Slug</TableCell>
-                    <TableCell>Title</TableCell>
-                    <TableCell>Category</TableCell>
-                    <TableCell>Excerpt</TableCell>
-                    <TableCell>Content</TableCell>
-                    <TableCell>Image</TableCell>
+                  <TableRow className="bg-gray-800 font-medium">
+                    <TableCell className="text-gray-300">ID</TableCell>
+                    <TableCell className="text-gray-300">Slug</TableCell>
+                    <TableCell className="text-gray-300">Title</TableCell>
+                    <TableCell className="text-gray-300">Category</TableCell>
+                    <TableCell className="text-gray-300">Excerpt</TableCell>
+                    <TableCell className="text-gray-300">Content</TableCell>
+                    <TableCell className="text-gray-300">Image</TableCell>
                   </TableRow>
                   
                   {/* Row with data values */}
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">{parsedData.id}</TableCell>
-                    <TableCell className="max-w-[200px] truncate">{parsedData.slug}</TableCell>
-                    <TableCell className="max-w-[200px] truncate">{parsedData.title}</TableCell>
+                    <TableCell className="whitespace-nowrap text-gray-300">{parsedData.id}</TableCell>
+                    <TableCell className="text-gray-300">{parsedData.slug}</TableCell>
+                    <TableCell className="text-gray-300">{parsedData.title}</TableCell>
                     <TableCell>
-                      <Badge variant="outline">{parsedData.category}</Badge>
+                      <Badge variant="outline" className="bg-gray-700 text-gray-300 border-gray-600">{parsedData.category}</Badge>
                     </TableCell>
-                    <TableCell className="max-w-[200px] truncate" title={parsedData.excerpt}>
-                      {parsedData.excerpt}
+                    <TableCell>
+                      <div className="max-h-32 overflow-y-auto text-gray-300">
+                        {parsedData.excerpt}
+                      </div>
                     </TableCell>
-                    <TableCell className="max-w-[200px] truncate" title={parsedData.content}>
-                      {parsedData.content.substring(0, 50)}...
+                    <TableCell>
+                      <div className="max-h-32 overflow-y-auto text-gray-300">
+                        <code className="whitespace-pre-wrap">{parsedData.content}</code>
+                      </div>
                     </TableCell>
-                    <TableCell className="max-w-[200px] truncate" title={parsedData.image}>
-                      {parsedData.image}
+                    <TableCell className="text-gray-300">
+                      <div className="max-w-md overflow-x-auto text-gray-300">
+                        {parsedData.image}
+                      </div>
                     </TableCell>
                   </TableRow>
                 </TableBody>
