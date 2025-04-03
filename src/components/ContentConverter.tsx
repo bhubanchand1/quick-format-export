@@ -46,27 +46,41 @@ const ContentConverter = () => {
         return;
       }
 
-      // Extract fields using regex patterns
-      const slugMatch = /slug:\s*(.+?)(?=\s*title:|$)/s.exec(inputContent);
-      const titleMatch = /title:\s*(.+?)(?=\s*category:|$)/s.exec(inputContent);
-      const categoryMatch = /category:\s*(.+?)(?=\s*excerpt:|$)/s.exec(inputContent);
-      const excerptMatch = /excerpt:\s*(.+?)(?=\s*content:|$)/s.exec(inputContent);
-      const contentMatch = /content:\s*\|\s*(.+?)(?=\s*image:|$)/s.exec(inputContent);
-      const imageMatch = /image:\s*(.+?)$/s.exec(inputContent);
+      // Extract fields using improved regex patterns that don't depend on field order
+      // These patterns look for field names followed by content until the next field or end of text
+      const extractField = (fieldName: string): string => {
+        const pattern = new RegExp(`${fieldName}:\\s*(.+?)(?=\\s*(?:slug:|title:|category:|excerpt:|content:|image:)|$)`, 'is');
+        const match = pattern.exec(inputContent);
+        return match ? match[1].trim() : '';
+      };
 
-      if (!slugMatch || !titleMatch || !categoryMatch || !excerptMatch || !contentMatch || !imageMatch) {
-        setError('Invalid format. Please check your input content format.');
+      // Extract fields regardless of order
+      const slug = extractField('slug');
+      const title = extractField('title');
+      const category = extractField('category');
+      const excerpt = extractField('excerpt');
+      
+      // Special handling for content field which might have pipe character
+      const contentPattern = /content:\s*\|\s*(.+?)(?=\s*(?:slug:|title:|category:|excerpt:|image:)|$)/is;
+      const contentMatch = contentPattern.exec(inputContent);
+      const content = contentMatch ? contentMatch[1].trim() : extractField('content');
+      
+      const image = extractField('image');
+
+      // Validate that we have at least the essential fields
+      if (!slug && !title && !content) {
+        setError('Could not extract required fields. Please check your input format.');
         return;
       }
 
       const parsedContent: ContentItem = {
         id: Date.now(),
-        slug: slugMatch[1].trim(),
-        title: titleMatch[1].trim(),
-        category: categoryMatch[1].trim(),
-        excerpt: excerptMatch[1].trim(),
-        content: contentMatch[1].trim(),
-        image: imageMatch[1].trim()
+        slug: slug || 'no-slug-found',
+        title: title || 'No Title Found',
+        category: category || 'Uncategorized',
+        excerpt: excerpt || 'No excerpt available',
+        content: content || 'No content available',
+        image: image || 'No image URL provided'
       };
 
       setParsedData(parsedContent);
@@ -159,7 +173,7 @@ const ContentConverter = () => {
           </label>
           <Textarea
             id="content-input"
-            placeholder="Paste content in the format: slug: value, title: value, etc..."
+            placeholder="Paste content in any order: slug: value, title: value, etc..."
             className="min-h-[200px] font-mono text-sm bg-white border-gray-300 text-gray-800"
             value={inputContent}
             onChange={(e) => setInputContent(e.target.value)}
